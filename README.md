@@ -114,6 +114,14 @@ cc "이 프로젝트 구조 설명해줘"    ← AI가 즉시 작업 시작
 - **의존성 명시** — `> 의존: STEP 2` 형태로 선행 조건 표기
 - **AI 친화적** — `--accept-package-agreements` 등 프롬프트 없이 자동 진행
 
+## 실제 동작 화면
+
+설치 완료 후 WezTerm에서 실제로 이렇게 사용합니다:
+
+![실제 동작 화면](./assets/preview.png)
+
+> 왼쪽: Claude Code 세션 | 가운데: Yazi 파일 탐색기 | 오른쪽: Markdown 미리보기 (Glow 렌더링)
+
 ## License
 
 MIT
