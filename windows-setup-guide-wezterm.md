@@ -260,56 +260,38 @@ Get-Command mdv
 
 ---
 
-## STEP 8: Yazi Glow 미리보기 플러그인 설정
+## STEP 8: Yazi Glow 미리보기 설정 (piper 플러그인)
 
 > 의존: STEP 2 (yazi, glow 설치)
 > Yazi에서 `.md` 파일에 커서를 올리면 오른쪽 미리보기 패널에 Glow 렌더링 결과가 표시됩니다.
+> 공식 권장 방식인 piper.yazi 플러그인을 사용합니다.
 
-### 8-1. Glow 프리뷰어 플러그인 생성
+### 8-1. piper 플러그인 설치
 
 ```powershell
-# 플러그인 디렉터리 생성
-$pluginDir = "$env:APPDATA\yazi\plugins\glow.yazi"
-if (!(Test-Path $pluginDir)) {
-    New-Item -Path $pluginDir -ItemType Directory -Force | Out-Null
-}
-
-# 플러그인 코드 작성
-@'
-local M = {}
-
-function M:peek(job)
-    local child = Command("glow")
-        :args({ "-s", "dark", "-w", tostring(job.area.w), tostring(job.file.url) })
-        :stdout(Command.PIPED)
-        :stderr(Command.PIPED)
-        :spawn()
-
-    local output, _ = child:wait_with_output()
-    if output and output.status and output.status.success then
-        ya.preview_widgets(job, { ui.Text.parse(output.stdout):area(job.area) })
-    else
-        require("code"):peek(job)
-    end
-end
-
-function M:seek(job)
-    require("code"):seek(job)
-end
-
-return M
-'@ | Set-Content -Path "$pluginDir\init.lua" -Encoding UTF8
+ya pkg add yazi-rs/plugins:piper
 ```
 
 **[CHECK]**
 
 ```powershell
-Test-Path "$env:APPDATA\yazi\plugins\glow.yazi\init.lua"
+Test-Path "$env:APPDATA\yazi\plugins\piper.yazi\main.lua"
 ```
 
 `True` 출력 시 통과.
 
-### 8-2. yazi.toml에 프리뷰어 등록
+폴백 — `ya` 명령이 안 되면 수동 설치:
+
+```powershell
+$piperDir = "$env:APPDATA\yazi\plugins\piper.yazi"
+if (!(Test-Path $piperDir)) {
+    git clone https://github.com/yazi-rs/plugins.git "$env:TEMP\yazi-plugins"
+    Copy-Item -Path "$env:TEMP\yazi-plugins\piper.yazi" -Destination $piperDir -Recurse -Force
+    Remove-Item -Path "$env:TEMP\yazi-plugins" -Recurse -Force
+}
+```
+
+### 8-2. yazi.toml에 Glow 프리뷰어 등록
 
 ```powershell
 $yaziConfigDir = "$env:APPDATA\yazi\config"
@@ -318,10 +300,9 @@ if (!(Test-Path $yaziConfigDir)) {
 }
 
 @'
-[plugin]
-prepend_previewers = [
-    { name = "*.md", run = "glow" },
-]
+[[plugin.prepend_previewers]]
+url = "*.md"
+run = 'piper -- CLICOLOR_FORCE=1 glow -w=$w -s=dark "$1"'
 '@ | Set-Content -Path "$yaziConfigDir\yazi.toml" -Encoding UTF8
 ```
 
@@ -332,7 +313,7 @@ Test-Path "$env:APPDATA\yazi\config\yazi.toml"
 Get-Content "$env:APPDATA\yazi\config\yazi.toml"
 ```
 
-`prepend_previewers` 내용이 출력되면 통과.
+`piper` 와 `glow` 가 포함된 내용이 출력되면 통과.
 
 ---
 
@@ -356,7 +337,7 @@ Write-Host "`n=== 설정 파일 ==="
 Test-Path "$HOME\.wezterm.lua"
 Test-Path $PROFILE
 Test-Path "$env:APPDATA\yazi\config\yazi.toml"
-Test-Path "$env:APPDATA\yazi\plugins\glow.yazi\init.lua"
+Test-Path "$env:APPDATA\yazi\plugins\piper.yazi\main.lua"
 
 Write-Host "`n=== 함수 등록 ==="
 Get-Command cc | Select-Object Name, CommandType
