@@ -338,10 +338,154 @@ Write-Host "`n=== 폰트 ==="
 
 ---
 
-## STEP 10: 설치 완료 안내 (AI가 사용자에게 전달)
+## STEP 10: WezTerm 실행 검증 (설정 오류 자동 수정)
+
+> 의존: STEP 6 (WezTerm 설정 파일), STEP 9 (최종 검증 통과)
+> 이 STEP에서 WezTerm을 실제로 실행하고, Lua 설정 파싱 오류가 있으면 자동으로 수정합니다.
+
+### 10-1. 설정 파일 문법 검증
+
+```powershell
+# WezTerm에 내장된 Lua 파서로 설정 파일 검증
+$result = wezterm --config-file "$HOME\.wezterm.lua" ls-fonts 2>&1
+$errors = $result | Select-String -Pattern "error|Error|ERROR|failed|Failed|FAILED|parse|Parse"
+
+if ($errors) {
+    Write-Host "FAIL: .wezterm.lua 설정에 오류가 있습니다:" -ForegroundColor Red
+    $errors | ForEach-Object { Write-Host $_.Line -ForegroundColor Yellow }
+} else {
+    Write-Host "OK: .wezterm.lua 설정 문법 정상" -ForegroundColor Green
+}
+```
+
+**[CHECK]** `OK` 출력 시 통과.
+
+오류 발생 시 — AI는 아래 순서로 수정:
+
+1. 오류 메시지에서 줄 번호 확인 (예: `line 42`)
+2. `$HOME\.wezterm.lua` 해당 줄 읽기
+3. Lua 문법에 맞게 수정 (빠진 콤마, 괄호, 따옴표 등)
+4. 저장 후 10-1 재실행
+5. 최대 3회 반복. 3회 실패 시 STEP 6의 원본 코드를 다시 Set-Content로 덮어쓰기
+
+### 10-2. WezTerm 실행 및 프로세스 확인
+
+```powershell
+# WezTerm 실행 (백그라운드)
+Start-Process wezterm
+
+# 3초 대기 후 프로세스 확인
+Start-Sleep -Seconds 3
+$proc = Get-Process -Name "wezterm*" -ErrorAction SilentlyContinue
+
+if ($proc) {
+    Write-Host "OK: WezTerm이 정상 실행 중입니다 (PID: $($proc.Id))" -ForegroundColor Green
+} else {
+    Write-Host "FAIL: WezTerm 프로세스를 찾을 수 없습니다" -ForegroundColor Red
+}
+```
+
+**[CHECK]** `OK` 출력 시 통과.
+
+실패 시 — AI는 아래를 순서대로 확인:
+
+1. `wezterm --version` 재확인 → 안 되면 STEP 2 재실행
+2. `Test-Path "$HOME\.wezterm.lua"` → `False`면 STEP 6 재실행
+3. 이벤트 로그 확인:
+   ```powershell
+   Get-WinEvent -LogName Application -MaxEvents 5 |
+     Where-Object { $_.Message -like '*wezterm*' } |
+     Select-Object TimeCreated, Message
+   ```
+
+### 10-3. WezTerm 내부에서 도구 동작 확인
+
+```powershell
+# WezTerm CLI로 새 pane을 열어서 yazi, glow 실행 테스트
+# (WezTerm이 실행 중이어야 동작)
+
+# yazi 실행 테스트
+$yaziTest = & yazi --version 2>&1
+if ($yaziTest -match 'Yazi') {
+    Write-Host "OK: yazi 정상" -ForegroundColor Green
+} else {
+    Write-Host "FAIL: yazi 실행 불가" -ForegroundColor Red
+}
+
+# glow 실행 테스트
+$glowTest = & glow --version 2>&1
+if ($glowTest -match 'glow') {
+    Write-Host "OK: glow 정상" -ForegroundColor Green
+} else {
+    Write-Host "FAIL: glow 실행 불가" -ForegroundColor Red
+}
+
+# PowerShell 프로필 함수 테스트
+$ccTest = Get-Command cc -ErrorAction SilentlyContinue
+$yyTest = Get-Command yy -ErrorAction SilentlyContinue
+$mdvTest = Get-Command mdv -ErrorAction SilentlyContinue
+
+if ($ccTest -and $yyTest -and $mdvTest) {
+    Write-Host "OK: cc, yy, mdv 함수 모두 등록됨" -ForegroundColor Green
+} else {
+    Write-Host "FAIL: 누락된 함수 있음. '. `$PROFILE' 실행 필요" -ForegroundColor Red
+    . $PROFILE
+    Write-Host "프로필 재로드 완료. 다시 확인하세요." -ForegroundColor Yellow
+}
+```
+
+**[CHECK]** 3개 모두 `OK` 출력 시 통과.
+
+### 10-4. 전체 실행 검증 요약
+
+```powershell
+Write-Host "`n========================================" -ForegroundColor Cyan
+Write-Host "  STEP 10 실행 검증 결과" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+
+$allPass = $true
+
+# 설정 파일
+$luaCheck = wezterm --config-file "$HOME\.wezterm.lua" ls-fonts 2>&1 |
+  Select-String -Pattern "error|Error|ERROR|failed|Failed|FAILED"
+if ($luaCheck) { Write-Host "[FAIL] .wezterm.lua 설정 오류" -ForegroundColor Red; $allPass = $false }
+else { Write-Host "[PASS] .wezterm.lua 설정 정상" -ForegroundColor Green }
+
+# 프로세스
+$proc = Get-Process -Name "wezterm*" -ErrorAction SilentlyContinue
+if ($proc) { Write-Host "[PASS] WezTerm 실행 중 (PID: $($proc.Id))" -ForegroundColor Green }
+else { Write-Host "[FAIL] WezTerm 미실행" -ForegroundColor Red; $allPass = $false }
+
+# 도구
+foreach ($cmd in @('yazi','glow')) {
+    $v = & $cmd --version 2>&1
+    if ($v -match $cmd) { Write-Host "[PASS] $cmd 정상" -ForegroundColor Green }
+    else { Write-Host "[FAIL] $cmd 실행 불가" -ForegroundColor Red; $allPass = $false }
+}
+
+# 함수
+foreach ($fn in @('cc','yy','mdv')) {
+    if (Get-Command $fn -ErrorAction SilentlyContinue) { Write-Host "[PASS] $fn 함수 등록됨" -ForegroundColor Green }
+    else { Write-Host "[FAIL] $fn 함수 없음" -ForegroundColor Red; $allPass = $false }
+}
+
+Write-Host "========================================" -ForegroundColor Cyan
+if ($allPass) {
+    Write-Host "  ALL PASS — 설치가 정상 완료되었습니다!" -ForegroundColor Green
+} else {
+    Write-Host "  일부 항목 실패 — 위 FAIL 항목을 확인하세요" -ForegroundColor Red
+}
+Write-Host "========================================`n" -ForegroundColor Cyan
+```
+
+**[CHECK]** `ALL PASS` 출력 시 통과. FAIL 항목이 있으면 해당 STEP으로 돌아가서 재실행.
+
+---
+
+## STEP 11: 설치 완료 안내 (AI가 사용자에게 전달)
 
 > 이 STEP은 명령 실행이 아닙니다.
-> STEP 9까지 모두 통과한 뒤, 아래 내용을 **사용자에게 그대로 안내**하세요.
+> STEP 10까지 모두 통과한 뒤, 아래 내용을 **사용자에게 그대로 안내**하세요.
 
 ---
 
