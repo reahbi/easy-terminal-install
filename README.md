@@ -13,7 +13,6 @@
 | 파일 | 대상 OS | 구성 |
 |------|---------|------|
 | [windows-setup-guide-wezterm.md](./windows-setup-guide-wezterm.md) | Windows 10/11 | WezTerm + PowerShell 7 + Yazi + Glow |
-| [mac-setup-guide-wezterm.md](./mac-setup-guide-wezterm.md) | macOS | WezTerm + Zellij + Glow |
 
 ## 설치되는 것들
 
@@ -28,21 +27,15 @@
 
 ### 방법 1: AI에게 맡기기 (권장)
 
-Claude Code가 이미 설치되어 있다면, 아래 링크를 복사해서 AI에게 전달하세요:
+Claude Code가 이미 설치되어 있다면, 아래를 복사해서 AI에게 전달하세요:
 
-**Windows:**
 ```
 이 문서를 읽고 순서대로 설치해줘: https://raw.githubusercontent.com/reahbi/easy-terminal-install/main/windows-setup-guide-wezterm.md
 ```
 
-**Mac:**
-```
-이 문서를 읽고 순서대로 설치해줘: https://raw.githubusercontent.com/reahbi/easy-terminal-install/main/mac-setup-guide-wezterm.md
-```
-
 ### 방법 2: 직접 따라하기
 
-1. 자신의 OS에 맞는 가이드 파일을 엽니다.
+1. [windows-setup-guide-wezterm.md](./windows-setup-guide-wezterm.md)를 엽니다.
 2. STEP 1부터 순서대로 명령어를 복사-붙여넣기합니다.
 3. 각 STEP의 `[CHECK]`가 통과하면 다음으로 넘어갑니다.
 
@@ -61,6 +54,56 @@ cc "이 프로젝트 구조 설명해줘"    ← AI가 즉시 작업 시작
 | `yy` | 파일 탐색기 열기 |
 | `mdv 파일.md` | Markdown 문서 보기 |
 | `pro`, `dwn` 등 | 등록한 폴더로 바로 이동 |
+
+## 단축키
+
+설치하면 WezTerm에 아래 단축키가 자동 설정됩니다.
+
+### 화면 분할
+
+| 키 | 동작 |
+|----|------|
+| `Alt+n` | 오른쪽으로 분할 |
+| `Alt+\` | 오른쪽으로 분할 |
+| `Alt+v` | 아래로 분할 |
+| `Alt+Enter` | 아래로 분할 |
+
+### 탭
+
+| 키 | 동작 |
+|----|------|
+| `Alt+t` | 새 탭 |
+| `Alt+1` ~ `Alt+5` | 탭 이동 |
+
+### 패널(pane) 제어
+
+| 키 | 동작 |
+|----|------|
+| `Alt+w` | 현재 pane 닫기 |
+| `Alt+z` | pane 확대 / 복귀 |
+| `Alt+f` | pane 선택 |
+| `Alt+e` | Yazi 사이드바 토글 |
+
+### 이동 / 리사이즈
+
+| 키 | 동작 |
+|----|------|
+| `Alt+방향키` | pane 간 이동 |
+| `Ctrl+Alt+방향키` | pane 크기 조절 |
+
+### 화면 배치 예시
+
+```
+┌──────────────────────┬─────────────┐
+│                      │             │
+│   코드 / 셸 작업     │  Alt+e로    │
+│   (메인 pane)        │  Yazi 토글  │
+│                      │             │
+├──────────────────────┤             │
+│   glow -p docs.md    │             │
+│   (문서 확인)        │             │
+└──────────────────────┴─────────────┘
+```
 
 ## 가이드 특징
 
