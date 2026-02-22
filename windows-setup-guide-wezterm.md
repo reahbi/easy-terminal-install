@@ -260,9 +260,56 @@ Get-Command mdv
 
 ---
 
-## STEP 8: Yazi 설정 (Markdown opener)
+## STEP 8: Yazi Glow 미리보기 플러그인 설정
 
 > 의존: STEP 2 (yazi, glow 설치)
+> Yazi에서 `.md` 파일에 커서를 올리면 오른쪽 미리보기 패널에 Glow 렌더링 결과가 표시됩니다.
+
+### 8-1. Glow 프리뷰어 플러그인 생성
+
+```powershell
+# 플러그인 디렉터리 생성
+$pluginDir = "$env:APPDATA\yazi\plugins\glow.yazi"
+if (!(Test-Path $pluginDir)) {
+    New-Item -Path $pluginDir -ItemType Directory -Force | Out-Null
+}
+
+# 플러그인 코드 작성
+@'
+local M = {}
+
+function M:peek(job)
+    local child = Command("glow")
+        :args({ "-s", "dark", "-w", tostring(job.area.w), tostring(job.file.url) })
+        :stdout(Command.PIPED)
+        :stderr(Command.PIPED)
+        :spawn()
+
+    local output, _ = child:wait_with_output()
+    if output and output.status and output.status.success then
+        ya.preview_widgets(job, { ui.Text.parse(output.stdout):area(job.area) })
+    else
+        require("code"):peek(job)
+    end
+end
+
+function M:seek(job)
+    require("code"):seek(job)
+end
+
+return M
+'@ | Set-Content -Path "$pluginDir\init.lua" -Encoding UTF8
+```
+
+**[CHECK]**
+
+```powershell
+Test-Path "$env:APPDATA\yazi\plugins\glow.yazi\init.lua"
+```
+
+`True` 출력 시 통과.
+
+### 8-2. yazi.toml에 프리뷰어 등록
 
 ```powershell
 $yaziConfigDir = "$env:APPDATA\yazi\config"
@@ -271,9 +318,9 @@ if (!(Test-Path $yaziConfigDir)) {
 }
 
 @'
-[opener]
-md = [
-  { run = 'glow -p %1', desc = "Glow" },
+[plugin]
+prepend_previewers = [
+    { name = "*.md", run = "glow" },
 ]
 '@ | Set-Content -Path "$yaziConfigDir\yazi.toml" -Encoding UTF8
 ```
@@ -282,9 +329,10 @@ md = [
 
 ```powershell
 Test-Path "$env:APPDATA\yazi\config\yazi.toml"
+Get-Content "$env:APPDATA\yazi\config\yazi.toml"
 ```
 
-`True` 출력 시 통과.
+`prepend_previewers` 내용이 출력되면 통과.
 
 ---
 
@@ -308,6 +356,7 @@ Write-Host "`n=== 설정 파일 ==="
 Test-Path "$HOME\.wezterm.lua"
 Test-Path $PROFILE
 Test-Path "$env:APPDATA\yazi\config\yazi.toml"
+Test-Path "$env:APPDATA\yazi\plugins\glow.yazi\init.lua"
 
 Write-Host "`n=== 함수 등록 ==="
 Get-Command cc | Select-Object Name, CommandType
@@ -332,7 +381,7 @@ Write-Host "`n=== 폰트 ==="
 | yazi --version | `Yazi x.x.x` |
 | glow --version | `glow version x.x.x` |
 | YAZI_FILE_ONE | `C:\Program Files\Git\usr\bin\file.exe` (경로) |
-| Test-Path (3개) | 모두 `True` |
+| Test-Path (4개) | 모두 `True` |
 | cc, y, mdv | `CommandType: Function` |
 | 폰트 | `JetBrainsMono Nerd Font` 계열 |
 
