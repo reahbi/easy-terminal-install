@@ -1,0 +1,74 @@
+# Easy Terminal Install
+
+터미널을 한 번도 써본 적 없는 사람도 **복사-붙여넣기만으로** 개발 환경을 갖출 수 있는 설치 가이드입니다.
+
+## 왜 만들었나
+
+- 터미널은 개발의 시작인데, 초보자에게는 설치 자체가 가장 큰 벽입니다.
+- 기존 가이드는 선택지가 많고, 중간에 막히면 어디서 틀렸는지 알 수 없습니다.
+- **AI(Claude Code)에게 이 문서를 던져주면, AI가 알아서 위에서 아래로 설치를 완료합니다.**
+
+## 구성
+
+| 파일 | 대상 OS | 구성 |
+|------|---------|------|
+| [windows-setup-guide-wezterm.md](./windows-setup-guide-wezterm.md) | Windows 10/11 | WezTerm + PowerShell 7 + Yazi + Glow |
+| [mac-setup-guide-wezterm.md](./mac-setup-guide-wezterm.md) | macOS | WezTerm + Zellij + Glow |
+
+## 설치되는 것들
+
+| 도구 | 하는 일 |
+|------|---------|
+| **WezTerm** | 터미널 (탭, 화면 분할 지원) |
+| **Yazi** | 터미널 안에서 파일 탐색 |
+| **Glow** | 터미널에서 Markdown 문서 보기 |
+| **Claude Code (`cc`)** | AI에게 작업 지시 |
+
+## 설치 방법
+
+### 방법 1: AI에게 맡기기 (권장)
+
+Claude Code가 이미 설치되어 있다면, 아래 링크를 복사해서 AI에게 전달하세요:
+
+**Windows:**
+```
+이 문서를 읽고 순서대로 설치해줘: https://raw.githubusercontent.com/reahbi/easy-terminal-install/main/windows-setup-guide-wezterm.md
+```
+
+**Mac:**
+```
+이 문서를 읽고 순서대로 설치해줘: https://raw.githubusercontent.com/reahbi/easy-terminal-install/main/mac-setup-guide-wezterm.md
+```
+
+### 방법 2: 직접 따라하기
+
+1. 자신의 OS에 맞는 가이드 파일을 엽니다.
+2. STEP 1부터 순서대로 명령어를 복사-붙여넣기합니다.
+3. 각 STEP의 `[CHECK]`가 통과하면 다음으로 넘어갑니다.
+
+## 설치 후 사용법
+
+설치가 끝나면 터미널에서 이렇게 사용합니다:
+
+```
+pro                              ← 프로젝트 폴더로 이동 (등록한 단축키)
+cc "이 프로젝트 구조 설명해줘"    ← AI가 즉시 작업 시작
+```
+
+| 명령어 | 동작 |
+|--------|------|
+| `cc "할 일"` | AI에게 작업 지시 |
+| `yy` | 파일 탐색기 열기 |
+| `mdv 파일.md` | Markdown 문서 보기 |
+| `pro`, `dwn` 등 | 등록한 폴더로 바로 이동 |
+
+## 가이드 특징
+
+- **분기 없음** — 선택지 대신 단일 경로 + 실패 시 폴백
+- **매 단계 검증** — `[CHECK]` 블록으로 성공/실패 즉시 판단
+- **의존성 명시** — `> 의존: STEP 2` 형태로 선행 조건 표기
+- **AI 친화적** — `--accept-package-agreements` 등 프롬프트 없이 자동 진행
+
+## License
+
+MIT
