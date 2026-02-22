@@ -633,7 +633,7 @@ Add-Content -Path $PROFILE -Value "function prj { Set-Location 'C:\Users\홍길�
 
 1. **WezTerm 실행** → PowerShell 7이 자동으로 열림
 2. `yy` → Yazi 파일 탐색기 (종료 시 해당 디렉터리로 이동)
-3. `Alt+e` → 오른쪽에 Yazi 사이드바 토글
+3. `Alt+e` → 오른쪽에 파일 탐색기 + 문서 뷰어 사이드바 토글
 4. `Alt+n` / `Alt+v` → pane 분할
 5. `mdv 파일명.md` → Markdown 문서 보기
 
@@ -666,7 +666,7 @@ Add-Content -Path $PROFILE -Value "function prj { Set-Location 'C:\Users\홍길�
 | `Alt+w` | 현재 pane 닫기 |
 | `Alt+z` | pane 확대/복귀 |
 | `Alt+f` | pane 선택 |
-| `Alt+e` | Yazi pane 토글 |
+| `Alt+e` | 파일 탐색기 + 문서 뷰어 사이드바 토글 |
 | `Alt+방향키` | pane 이동 |
 | `Alt+Shift+방향키` | pane 리사이즈 |
 
