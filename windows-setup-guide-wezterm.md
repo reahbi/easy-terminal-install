@@ -193,10 +193,10 @@ config.keys = {
   { key = 'UpArrow',    mods = 'ALT', action = act.ActivatePaneDirection 'Up' },
   { key = 'DownArrow',  mods = 'ALT', action = act.ActivatePaneDirection 'Down' },
 
-  { key = 'LeftArrow',  mods = 'CTRL|ALT', action = act.AdjustPaneSize { 'Left', 3 } },
-  { key = 'RightArrow', mods = 'CTRL|ALT', action = act.AdjustPaneSize { 'Right', 3 } },
-  { key = 'UpArrow',    mods = 'CTRL|ALT', action = act.AdjustPaneSize { 'Up', 2 } },
-  { key = 'DownArrow',  mods = 'CTRL|ALT', action = act.AdjustPaneSize { 'Down', 2 } },
+  { key = 'LeftArrow',  mods = 'ALT|SHIFT', action = act.AdjustPaneSize { 'Left', 3 } },
+  { key = 'RightArrow', mods = 'ALT|SHIFT', action = act.AdjustPaneSize { 'Right', 3 } },
+  { key = 'UpArrow',    mods = 'ALT|SHIFT', action = act.AdjustPaneSize { 'Up', 2 } },
+  { key = 'DownArrow',  mods = 'ALT|SHIFT', action = act.AdjustPaneSize { 'Down', 2 } },
 }
 
 return config
@@ -636,7 +636,7 @@ Add-Content -Path $PROFILE -Value "function prj { Set-Location 'C:\Users\홍길�
 | `Alt+f` | pane 선택 |
 | `Alt+e` | Yazi pane 토글 |
 | `Alt+방향키` | pane 이동 |
-| `Ctrl+Alt+방향키` | pane 리사이즈 |
+| `Alt+Shift+방향키` | pane 리사이즈 |
 
 ### 트러블슈팅
 
